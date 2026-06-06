@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analisis Butir Soal UAS - Validitas, Reliabilitas, Kesukaran & Daya Pembeda</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Header / Navigasi -->
+  <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="p-3 bg-white/10 rounded-xl">
+          <i class="fa-solid fa-calculator text-3xl text-amber-300 animate-pulse"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-extrabold tracking-tight">Kalkulator Analisis Butir Soal</h1>
+          <p class="text-blue-100 text-xs sm:text-sm">Analisis Validitas Pearson, Reliabilitas KR-20, Tingkat Kesukaran & Daya Pembeda</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 bg-blue-900/40 px-4 py-2 rounded-lg border border-blue-500/30 text-xs">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+        <span class="font-semibold text-slate-100">Siap Proses Data Fleksibel</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 flex-grow space-y-8">
+    
+    <!-- Penjelasan Singkat tentang Metode Analisis -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div class="space-y-1">
+        <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">Validitas</span>
+        <h3 class="text-sm font-bold text-slate-900">Pearson Product Moment</h3>
+        <p class="text-xs text-slate-500">Menguji hubungan skor item dengan skor total responden untuk menentukan butir soal valid atau gugur.</p>
+      </div>
+      <div class="space-y-1 border-t md:border-t-0 md:border-l border-slate-100 md:pl-6 pt-4 md:pt-0">
+        <span class="text-xs font-bold text-violet-600 uppercase tracking-wider">Reliabilitas</span>
+        <h3 class="text-sm font-bold text-slate-900">Metode Kuder-Richardson 20</h3>
+        <p class="text-xs text-slate-500">Melihat konsistensi keseluruhan instrumen soal pilihan ganda berbasis penilaian dikotomi (Benar=1, Salah=0).</p>
+      </div>
+      <div class="space-y-1 border-t md:border-t-0 md:border-l border-slate-100 md:pl-6 pt-4 md:pt-0">
+        <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Tingkat Kesukaran</span>
+        <h3 class="text-sm font-bold text-slate-900">Rasio Jawaban Benar ($P$)</h3>
+        <p class="text-xs text-slate-500">Menghitung proporsi kebenaran siswa menjawab satu butir soal: Mudah ($P > 0.70$), Sedang, atau Sukar ($P < 0.30$).</p>
+      </div>
+      <div class="space-y-1 border-t md:border-t-0 md:border-l border-slate-100 md:pl-6 pt-4 md:pt-0">
+        <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Daya Pembeda</span>
+        <h3 class="text-sm font-bold text-slate-900">Kelompok Atas vs Bawah</h3>
+        <p class="text-xs text-slate-500">Mengukur seberapa kuat soal membedakan siswa pandai (atas) dengan siswa kurang pandai (bawah).</p>
+      </div>
+    </div>
+
+    <!-- PENGATURAN AWAL & INPUT KUNCI -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- SISI KIRI: CONFIGURATION PANEL -->
+      <div class="lg:col-span-1 space-y-6">
+        
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-4">
+          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-gear text-blue-600"></i>
+            1. Atur Jumlah Soal & Parameter
+          </h3>
+          
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Jumlah Butir Soal</label>
+            <div class="flex gap-2">
+              <input type="number" id="numQuestions" value="10" min="1" max="100" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold">
+              <button onclick="rebuildTableStructure()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
+                Terapkan
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Signifikansi (Alpha)</label>
+              <select id="alphaSelect" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-semibold">
+                <option value="0.05" selected>5% (Umum)</option>
+                <option value="0.01">1% (Ketat)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Daya Pembeda</label>
+              <select id="dpMethodSelect" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-semibold">
+                <option value="50" selected>Metode 50%</option>
+                <option value="27">Metode 27%</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- INPUT KUNCI JAWABAN -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-key text-amber-500"></i>
+              2. Kunci Jawaban
+            </h3>
+            <span id="keyLabel" class="text-[10px] bg-amber-50 text-amber-700 font-bold px-2.5 py-1 rounded-full border border-amber-100">10 Soal</span>
+          </div>
+          <p class="text-xs text-slate-500">Ketik urutan huruf kunci jawaban (pisahkan menggunakan koma atau spasi). Huruf kecil otomatis dikapitalisasi.</p>
+          <textarea id="keyInputText" rows="2" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono tracking-widest focus:ring-2 focus:ring-blue-500 focus:outline-none uppercase">A, B, C, D, E, A, B, C, D, E</textarea>
+          <div class="flex justify-end">
+            <button onclick="applyKeyText()" class="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check"></i> Perbarui Kunci
+            </button>
+          </div>
+        </div>
+
+        <!-- FAST IMPORT DARI EXCEL / GOOGLE SHEETS -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-4">
+          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-file-import text-emerald-600"></i>
+            3. Paste Cepat dari Excel / CSV
+          </h3>
+          <p class="text-xs text-slate-500">Salin tabel data siswa Anda langsung dari Excel (kolom pertama: Nama, kolom berikutnya: Jawaban), lalu tempelkan di bawah ini:</p>
+          <textarea id="pasteArea" rows="4" placeholder="Siswa A	A	B	C	D	E	A	B	C	D	E&#10;Siswa B	B	B	C	D	A	A	E	C	D	C" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+          
+          <div class="flex gap-2">
+            <button onclick="importFromPaste()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-lg transition-all flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-file-excel"></i> Impor Jawaban
+            </button>
+            <button onclick="loadDemo10Questions()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition-all">
+              Load Data Demo
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SISI KANAN: JAWABAN SISWA -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+          <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50/50">
+            <div>
+              <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-graduation-cap text-blue-600"></i>
+                Tabel Jawaban Responden / Siswa
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">Isi atau edit nama siswa beserta pilihan jawabannya secara manual atau melalui paste Excel.</p>
+            </div>
+            
+            <div class="flex gap-2 w-full sm:w-auto">
+              <button onclick="addBlankStudentRow()" class="flex-1 sm:flex-initial bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1">
+                <i class="fa-solid fa-user-plus"></i> + Siswa
+              </button>
+              <button onclick="clearStudentsTable()" class="flex-1 sm:flex-initial bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1">
+                <i class="fa-solid fa-trash-can"></i> Hapus Semua
+              </button>
+            </div>
+          </div>
+
+          <!-- CONTAINER SCROLLING UNTUK TABEL JAWABAN -->
+          <div class="overflow-x-auto max-h-[420px]">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-100 text-slate-600 font-bold sticky top-0 z-10 border-b border-slate-200">
+                <tr>
+                  <th class="p-3 w-12 text-center">No</th>
+                  <th class="p-3 min-w-[160px]">Nama Siswa</th>
+                  <!-- Dynamic Headers untuk Soal akan dimasukkan di sini -->
+                  <th id="dynamicHeaderInsertMark"></th>
+                  <th class="p-3 w-16 text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="studentTableBody" class="divide-y divide-slate-100">
+                <!-- Row input jawaban dinonaktifkan / diisi lewat javascript -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+            <span id="studentCountLabel" class="text-xs text-slate-500 font-medium">Terdaftar: 0 Siswa</span>
+            <button onclick="runUltimateAnalysis()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-bold py-2.5 px-6 rounded-xl shadow-md shadow-blue-500/10 hover:shadow-lg transition-all flex items-center gap-2">
+              <i class="fa-solid fa-chart-line text-base"></i>
+              Mulai Analisis Butir Soal!
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- HASIL ANALISIS (TERTUTUP JIKA BELUM DIKLIK) -->
+    <div id="resultsWrapper" class="hidden space-y-8">
+      
+      <!-- KARTU RINGKASAN REKAPITULASI -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Kartu Reliabilitas KR-20 -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden">
+          <div class="absolute -right-4 -bottom-4 text-slate-50 text-8xl font-bold opacity-30 select-none">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div class="relative space-y-2">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Reliabilitas Tes (KR-20)</p>
+            <div class="flex items-baseline gap-2">
+              <h4 id="reliabilityVal" class="text-4xl font-black text-indigo-600">0.00</h4>
+              <span id="reliabilityBadge" class="text-[10px] px-2 py-0.5 rounded font-bold uppercase">Memuat</span>
+            </div>
+            <p id="reliabilityDesc" class="text-xs text-slate-500">Menganalisis tingkat konsistensi butir soal...</p>
+          </div>
+        </div>
+
+        <!-- Kartu Total Soal Valid -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden">
+          <div class="absolute -right-4 -bottom-4 text-slate-50 text-8xl font-bold opacity-30 select-none">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div class="relative space-y-2">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Jumlah Soal Valid</p>
+            <div class="flex items-baseline gap-2">
+              <h4 id="validCountVal" class="text-4xl font-black text-emerald-600">0 / 0</h4>
+              <span id="validPct" class="text-xs text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">0%</span>
+            </div>
+            <p id="validDesc" class="text-xs text-slate-500">Siswa menjawab berdasarkan batas kritis r-tabel.</p>
+          </div>
+        </div>
+
+        <!-- Kartu Kualitas Soal Keseluruhan -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden">
+          <div class="absolute -right-4 -bottom-4 text-slate-50 text-8xl font-bold opacity-30 select-none">
+            <i class="fa-solid fa-chart-bar"></i>
+          </div>
+          <div class="relative space-y-2">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Kelayakan Instrumen</p>
+            <h4 id="instrumentQuality" class="text-2xl font-extrabold text-slate-800 mt-1">Belum Teruji</h4>
+            <p id="instrumentDesc" class="text-xs text-slate-500">Hasil gabungan validitas dan reliabilitas soal.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- KETERANGAN PARAMETER PARAMETER YANG BERLAKU -->
+      <div class="bg-slate-900 text-slate-300 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="space-y-1">
+          <h4 class="text-amber-400 font-bold text-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info"></i> Info Detail Statistik:
+          </h4>
+          <p id="statsInformationText" class="text-xs text-slate-300">Jumlah Siswa (N) = 0, r-Tabel = 0.000</p>
+        </div>
+        <div class="bg-white/10 px-3 py-2 rounded-lg border border-white/10 text-[10px] font-mono text-slate-200">
+          <span>Rumus r-hitung Pearson:</span><br>
+          <span class="text-amber-300">r = (N*ΣXY - ΣX*ΣY) / √[ (N*ΣX² - (ΣX)²) * (N*ΣY² - (ΣY)²) ]</span>
+        </div>
+      </div>
+
+      <!-- TABEL HASIL UTAMA DETAIL BUTIR SOAL -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/30">
+          <div>
+            <h3 class="text-base font-bold text-slate-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-square-poll-horizontal text-blue-600"></i>
+              Tabel Rincian Hasil Analisis Per Butir Soal
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">Semua data validitas, reliabilitas, kesukaran, dan daya pembeda dikalkulasikan sekaligus.</p>
+          </div>
+          
+          <button onclick="downloadCSVReport()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md shadow-emerald-600/10 transition-all flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-file-csv text-base"></i> Ekspor Hasil ke Excel (.CSV)
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-100">
+              <tr>
+                <th class="p-3 text-center border-b border-slate-100">No Soal</th>
+                <th class="p-3 text-center bg-blue-50/50 text-blue-900 font-bold border-b border-slate-100">Kunci</th>
+                <th class="p-3 text-center border-b border-slate-100">Jml Benar</th>
+                <th class="p-3 text-center text-blue-700 bg-blue-50/10 font-bold border-b border-slate-100">r-Hitung</th>
+                <th class="p-3 text-center border-b border-slate-100">r-Tabel</th>
+                <th class="p-3 text-center border-b border-slate-100">Status Validitas</th>
+                <th class="p-3 text-center border-b border-slate-100">Indeks Kesukaran</th>
+                <th class="p-3 text-center border-b border-slate-100">Kategori Kesukaran</th>
+                <th class="p-3 text-center text-amber-800 bg-amber-50/10 font-bold border-b border-slate-100">Daya Pembeda</th>
+                <th class="p-3 text-center border-b border-slate-100">Kategori DP</th>
+                <th class="p-3 text-center font-bold border-b border-slate-100">Rekomendasi Butir</th>
+              </tr>
+            </thead>
+            <tbody id="analysisResultsTbody" class="divide-y divide-slate-100">
+              <!-- Hasil analisis akan dibuat secara dinamis menggunakan JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- KELOMPOK ATAS & BAWAH UNTUK DAYA PEMBEDA -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Kelompok Atas -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-3">
+          <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+            Kelompok Atas (Skor Tertinggi)
+          </h4>
+          <p class="text-xs text-slate-500">Anggota dengan nilai total tertinggi sebagai pembanding daya pembeda:</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="border-b border-slate-100 text-slate-400 font-semibold">
+                  <th class="py-2">No</th>
+                  <th class="py-2">Nama Responden</th>
+                  <th class="py-2 text-right">Skor Total</th>
+                </tr>
+              </thead>
+              <tbody id="highGroupTbody" class="divide-y divide-slate-50 text-slate-600">
+                <!-- Diisi Dinamis -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Kelompok Bawah -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-3">
+          <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-rose-500 inline-block animate-pulse"></span>
+            Kelompok Bawah (Skor Terendah)
+          </h4>
+          <p class="text-xs text-slate-500">Anggota dengan nilai total terendah sebagai pembanding daya pembeda:</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="border-b border-slate-100 text-slate-400 font-semibold">
+                  <th class="py-2">No</th>
+                  <th class="py-2">Nama Responden</th>
+                  <th class="py-2 text-right">Skor Total</th>
+                </tr>
+              </thead>
+              <tbody id="lowGroupTbody" class="divide-y divide-slate-50 text-slate-600">
+                <!-- Diisi Dinamis -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="bg-slate-950 text-slate-400 py-8 text-xs border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-2">
+      <p class="font-bold text-slate-300 text-sm">Aplikasi Analisis Butir Soal UAS Kuantitatif</p>
+      <p>Menggunakan standardisasi statistik pendidikan untuk perhitungan validitas, reliabilitas, kesukaran, dan daya pembeda.</p>
+    </div>
+  </footer>
+
+  <!-- SISTEM LOGIKA UTAMA APLIKASI -->
+  <script>
+    // Konstanta Tabel R Pearson (Dua Arah - Two Tailed)
+    const CRITICAL_R_TABLE = {
+      0.05: {
+        3: 0.878, 4: 0.811, 5: 0.754, 6: 0.707, 7: 0.666, 8: 0.632, 9: 0.602, 10: 0.576,
+        11: 0.553, 12: 0.532, 13: 0.514, 14: 0.497, 15: 0.482, 16: 0.468, 17: 0.456, 18: 0.444,
+        19: 0.433, 20: 0.423, 21: 0.413, 22: 0.404, 23: 0.396, 24: 0.388, 25: 0.381, 26: 0.374,
+        27: 0.367, 28: 0.361, 29: 0.355, 30: 0.349, 31: 0.344, 32: 0.339, 33: 0.334, 34: 0.329,
+        35: 0.325, 36: 0.320, 37: 0.316, 38: 0.312, 39: 0.308, 40: 0.304, 45: 0.288, 50: 0.273,
+        60: 0.250, 70: 0.232, 80: 0.217, 90: 0.205, 100: 0.195
+      },
+      0.01: {
+        3: 0.959, 4: 0.917, 5: 0.874, 6: 0.834, 7: 0.798, 8: 0.765, 9: 0.735, 10: 0.708,
+        11: 0.684, 12: 0.661, 13: 0.641, 14: 0.623, 15: 0.606, 16: 0.590, 17: 0.575, 18: 0.561,
+        19: 0.549, 20: 0.537, 21: 0.526, 22: 0.515, 23: 0.505, 24: 0.496, 25: 0.487, 26: 0.479,
+        27: 0.471, 28: 0.463, 29: 0.456, 30: 0.449, 31: 0.442, 32: 0.436, 33: 0.430, 34: 0.424,
+        35: 0.418, 36: 0.413, 37: 0.408, 38: 0.403, 39: 0.398, 40: 0.393, 45: 0.372, 50: 0.354,
+        60: 0.325, 70: 0.302, 80: 0.283, 90: 0.267, 100: 0.254
+      }
+    };
+
+    // Mengambil nilai r-tabel berdasarkan jumlah N
+    function getRValue(N, alpha) {
+      const df = N - 2;
+      if (df < 3) return 0.997; // Fallback jika sangat kecil
+      const list = CRITICAL_R_TABLE[alpha];
+      if (list[df] !== undefined) {
+        return list[df];
+      }
+      // Ambil nilai interpolasi sederhana jika df berada di antara data tabel
+      const keys = Object.keys(list).map(Number).sort((a,b) => a-b);
+      for (let i = 0; i < keys.length; i++) {
+        if (keys[i] > df) {
+          return list[keys[i-1]];
+        }
+      }
+      return 0.195; // Default jika N sangat besar
+    }
+
+    // STATE UTAMA
+    let totalQuestions = 10;
+    let keysArray = ["A", "B", "C", "D", "E", "A", "B", "C", "D", "E"];
+    let studentsAnswers = []; // [{ name: "...", answers: ["A", "B", ...] }]
+
+    // MEMBANGUN STRUKTUR INPUT TABEL BERDASARKAN JUMLAH SOAL
+    function rebuildTableStructure() {
+      const inputNum = parseInt(document.getElementById('numQuestions').value) || 10;
+      totalQuestions = Math.min(Math.max(inputNum, 1), 100); // Batas 1-100 soal
+      document.getElementById('numQuestions').value = totalQuestions;
+
+      // Update Label
+      document.getElementById('keyLabel').innerText = `${totalQuestions} Soal`;
+
+      // Sesuaikan Kunci Jawaban
+      syncKeysFromTextarea();
+
+      // Perbarui header kolom dinamis soal di tabel
+      const existingHeaders = document.querySelectorAll('.dynamic-header-col');
+      existingHeaders.forEach(col => col.remove());
+
+      const markElement = document.getElementById('dynamicHeaderInsertMark');
+      for (let i = totalQuestions; i >= 1; i--) {
+        const th = document.createElement('th');
+        th.className = 'p-3 w-12 text-center bg-slate-50 dynamic-header-col border-b border-slate-200';
+        th.innerText = i;
+        markElement.parentNode.insertBefore(th, markElement);
+      }
+
+      // Atur isi sel tabel untuk tiap siswa
+      const tbody = document.getElementById('studentTableBody');
+      const rows = tbody.querySelectorAll('.student-row-input');
+
+      if (rows.length === 0) {
+        // Buat 5 baris kosong default
+        for (let i = 1; i <= 5; i++) {
+          createBlankRow(`Siswa ${i}`);
+        }
+      } else {
+        // Sesuaikan kolom input jika baris siswa sudah ada sebelumnya
+        rows.forEach((row, rIdx) => {
+          const cells = row.querySelectorAll('.dynamic-cell-input');
+          cells.forEach(c => c.remove());
+
+          const actionCell = row.lastElementChild;
+          for (let q = 1; q <= totalQuestions; q++) {
+            const td = document.createElement('td');
+            td.className = 'p-1 text-center dynamic-cell-input border-b border-slate-100';
+
+            const inp = document.createElement('input');
+            inp.type = 'text';
+            inp.maxLength = 1;
+            inp.className = 'w-9 h-9 text-center border border-slate-200 rounded uppercase font-semibold text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none student-ans-input';
+            inp.dataset.qidx = q;
+            // Kembalikan value lama jika ada
+            if (studentsAnswers[rIdx] && studentsAnswers[rIdx].answers && studentsAnswers[rIdx].answers[q-1]) {
+              inp.value = studentsAnswers[rIdx].answers[q-1];
+            } else {
+              inp.value = "";
+            }
+
+            td.appendChild(inp);
+            row.insertBefore(td, actionCell);
+          }
+        });
+      }
+      updateRowNumbers();
+    }
+
+    // MENYINGKRONKAN KUNCI JAWABAN DARI TEXTAREA
+    function syncKeysFromTextarea() {
+      const text = document.getElementById('keyInputText').value;
+      const parsedKeys = text.replace(/[^a-zA-Z,]/g, '').toUpperCase().split(',');
+      const cleanKeys = parsedKeys.filter(x => x.length > 0);
+
+      keysArray = [];
+      for (let i = 0; i < totalQuestions; i++) {
+        keysArray.push(cleanKeys[i] || "A"); // Default "A" jika input kosong/kurang
+      }
+
+      document.getElementById('keyInputText').value = keysArray.join(', ');
+    }
+
+    // MENERAPKAN KUNCI BARU JIKA DI-SUBMIT SECARA MANUAL
+    function applyKeyText() {
+      syncKeysFromTextarea();
+      alert("Kunci jawaban berhasil diperbarui!");
+    }
+
+    // MEMBUAT ROW KOSONG SISWA BARU
+    function createBlankRow(customName = "") {
+      const tbody = document.getElementById('studentTableBody');
+      const rNum = tbody.children.length + 1;
+      const name = customName || `Siswa ${rNum}`;
+
+      const tr = document.createElement('tr');
+      tr.className = 'hover:bg-slate-50/80 transition-colors student-row-input';
+
+      // Kolom No Urut
+      const tdNo = document.createElement('td');
+      tdNo.className = 'p-3 text-center border-b border-slate-100 font-semibold text-slate-400 row-no-lbl';
+      tdNo.innerText = rNum;
+      tr.appendChild(tdNo);
+
+      // Kolom Nama
+      const tdName = document.createElement('td');
+      tdName.className = 'p-3 border-b border-slate-100';
+      const nameInp = document.createElement('input');
+      nameInp.type = 'text';
+      nameInp.value = name;
+      nameInp.className = 'w-full bg-transparent border-0 font-medium text-slate-800 text-xs focus:ring-2 focus:ring-blue-100 focus:bg-white rounded px-2 py-1.5 focus:outline-none name-input-field';
+      tdName.appendChild(nameInp);
+      tr.appendChild(tdName);
+
+      // Kolom Pilihan Jawaban per Soal
+      for (let q = 1; q <= totalQuestions; q++) {
+        const td = document.createElement('td');
+        td.className = 'p-1 text-center dynamic-cell-input border-b border-slate-100';
+
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.maxLength = 1;
+        inp.className = 'w-9 h-9 text-center border border-slate-200 rounded uppercase font-semibold text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none student-ans-input';
+        inp.dataset.qidx = q;
+        td.appendChild(inp);
+        tr.appendChild(td);
+      }
+
+      // Kolom Hapus
+      const tdAct = document.createElement('td');
+      tdAct.className = 'p-3 text-center border-b border-slate-100';
+      const delBtn = document.createElement('button');
+      delBtn.className = 'text-rose-500 hover:text-rose-700 p-1 rounded hover:bg-rose-50 transition-colors';
+      delBtn.innerHTML = '<i class="fa-solid fa-user-minus"></i>';
+      delBtn.onclick = function() {
+        tr.remove();
+        updateRowNumbers();
+      };
+      tdAct.appendChild(delBtn);
+      tr.appendChild(tdAct);
+
+      tbody.appendChild(tr);
+    }
+
+    // UPDATE DATA LABEL JUMLAH DAN URUTAN NO BARIS
+    function updateRowNumbers() {
+      const rows = document.querySelectorAll('#studentTableBody tr');
+      rows.forEach((r, index) => {
+        r.querySelector('.row-no-lbl').innerText = index + 1;
+      });
+      document.getElementById('studentCountLabel').innerText = `Terdaftar: ${rows.length} Siswa`;
+    }
+
+    // TOMBOL +SISWA SECARA MANUAL
+    function addBlankStudentRow() {
+      createBlankRow();
+      updateRowNumbers();
+    }
+
+    // HAPUS SEMUA BARIS TABEL
+    function clearStudentsTable() {
+      document.getElementById('studentTableBody').innerHTML = '';
+      createBlankRow("Siswa 1");
+      updateRowNumbers();
+      document.getElementById('resultsWrapper').classList.add('hidden');
+    }
+
+    // MEMBACA JAWABAN SISWA DARI TABEL KE STATE DATA
+    function extractAnswersFromTable() {
+      const rows = document.querySelectorAll('#studentTableBody tr');
+      studentsAnswers = [];
+
+      rows.forEach(r => {
+        const name = r.querySelector('.name-input-field').value.trim() || 'Tanpa Nama';
+        const inps = r.querySelectorAll('.student-ans-input');
+        const ans = [];
+
+        inps.forEach(i => {
+          ans.push(i.value.trim().toUpperCase() || '-');
+        });
+
+        studentsAnswers.push({
+          name: name,
+          answers: ans
+        });
+      });
+    }
+
+    // PROSES MEMASUKKAN DATA PASTE COPY EXCEL / CSV
+    function importFromPaste() {
+      const text = document.getElementById('pasteArea').value.trim();
+      if (!text) {
+        alert("Kolom paste kosong! Tolong salin baris tabel dari Excel lalu paste disini.");
+        return;
+      }
+
+      const lines = text.split('\n');
+      const tbody = document.getElementById('studentTableBody');
+      tbody.innerHTML = '';
+
+      let maxColsDetected = 0;
+
+      lines.forEach((line, index) => {
+        let parts = line.split('\t');
+        if (parts.length <= 1) {
+          parts = line.split(',');
+        }
+
+        if (parts.length > 0 && parts[0].trim() !== "") {
+          let studentName = parts[0].trim();
+          
+          // Jika kolom pertama adalah no absen (angka), gunakan nama di kolom kedua
+          if (!isNaN(studentName) && parts.length > 1) {
+            studentName = parts[1].trim();
+            parts.shift();
+          }
+
+          const answersList = [];
+          for (let i = 1; i < parts.length; i++) {
+            const char = parts[i].trim().toUpperCase();
+            if (char.length > 0) {
+              answersList.push(char);
+            }
+          }
+
+          if (answersList.length > maxColsDetected) {
+            maxColsDetected = answersList.length;
+          }
+
+          // Buat Baris Baru
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-slate-50/80 transition-colors student-row-input';
+
+          tr.innerHTML = `
+            <td class="p-3 text-center border-b border-slate-100 font-semibold text-slate-400 row-no-lbl">${index+1}</td>
+            <td class="p-3 border-b border-slate-100">
+              <input type="text" value="${studentName}" class="w-full bg-transparent border-0 font-medium text-slate-800 text-xs focus:ring-2 focus:ring-blue-100 focus:bg-white rounded px-2 py-1.5 focus:outline-none name-input-field">
+            </td>
+          `;
+
+          // Kita buatkan kolom input jawaban
+          studentsAnswers.push({ name: studentName, answers: answersList });
+        }
+      });
+
+      // Terapkan deteksi kolom terbanyak sebagai total butir soal
+      if (maxColsDetected > 0) {
+        document.getElementById('numQuestions').value = maxColsDetected;
+        totalQuestions = maxColsDetected;
+      }
+
+      // Bangun ulang tabel
+      rebuildTableStructure();
+
+      // Isi nilai jawaban yang diimpor ke tabel
+      const rows = document.querySelectorAll('#studentTableBody tr');
+      rows.forEach((row, rIdx) => {
+        const itemAnswers = studentsAnswers[rIdx].answers;
+        const inputs = row.querySelectorAll('.student-ans-input');
+        inputs.forEach((inp, qIdx) => {
+          inp.value = itemAnswers[qIdx] || "";
+        });
+      });
+
+      updateRowNumbers();
+      alert(`Berhasil mengimpor ${lines.length} data siswa dengan total ${maxColsDetected} butir soal!`);
+    }
+
+    // LOAD CONTOH DATA DEMO 10 SOAL (SANGAT MUDAH DICENTANG)
+    function loadDemo10Questions() {
+      document.getElementById('numQuestions').value = 10;
+      document.getElementById('keyInputText').value = "A, B, C, D, E, A, B, C, D, E";
+      
+      const demoRaw = [
+        "Siswa A\tA\tB\tC\tD\tE\tA\tB\tC\tD\tE",
+        "Siswa B\tA\tB\tA\tD\tE\tA\tC\tC\tD\tE",
+        "Siswa C\tB\tB\tC\tD\tE\tE\tB\tC\tD\tA",
+        "Siswa D\tA\tD\tC\tD\tE\tA\tB\tA\tD\tE",
+        "Siswa E\tA\tB\tC\tC\tC\tA\tB\tC\tA\tE",
+        "Siswa F\tC\tD\tA\tD\tE\tA\tB\tC\tD\tE",
+        "Siswa G\tB\tA\tE\tA\tA\tC\tC\tB\tA\tB",
+        "Siswa H\tC\tC\tD\tB\tB\tE\tD\tA\tC\tD",
+        "Siswa I\tD\tD\tE\tE\tC\tB\tA\tA\tB\tA",
+        "Siswa J\tC\tE\tA\tC\tB\tD\tD\tE\tE\tD"
+      ];
+
+      document.getElementById('pasteArea').value = demoRaw.join('\n');
+      importFromPaste();
+    }
+
+    // LOGIKA PERHITUNGAN UTAMA (ULTIMATE ANALYSIS)
+    function runUltimateAnalysis() {
+      extractAnswersFromTable();
+      syncKeysFromTextarea();
+
+      const N = studentsAnswers.length;
+      if (N < 3) {
+        alert("Jumlah siswa/responden minimal harus 3 orang untuk memulai proses analisis!");
+        return;
+      }
+
+      const alpha = parseFloat(document.getElementById('alphaSelect').value);
+      const dpMethod = parseInt(document.getElementById('dpMethodSelect').value);
+      const rTabel = getRValue(N, alpha);
+
+      // 1. Konversi data biner (Benar = 1, Salah = 0) & kalkulasi skor total per siswa
+      const binaryMatrix = []; // binaryMatrix[siswaIdx][soalIdx]
+      const scoresArray = []; // List skor total per siswa
+
+      studentsAnswers.forEach((student, sIdx) => {
+        const studentBiner = [];
+        let runningScore = 0;
+
+        for (let qIdx = 0; qIdx < totalQuestions; qIdx++) {
+          const rawAns = student.answers[qIdx] || '';
+          const correctKey = keysArray[qIdx] || '';
+
+          const score = (rawAns === correctKey) ? 1 : 0;
+          studentBiner.push(score);
+          runningScore += score;
+        }
+
+        binaryMatrix.push(studentBiner);
+        scoresArray.push(runningScore);
+        student.scoreTotal = runningScore; // simpan di object asli
+      });
+
+      // 2. Pembagian Kelompok Atas & Bawah untuk analisis Daya Pembeda (DP)
+      // Urutkan siswa dari nilai total tertinggi ke terendah
+      const sortedResponders = studentsAnswers.map((s, idx) => ({
+        originalIndex: idx,
+        name: s.name,
+        scoreTotal: s.scoreTotal,
+        binary: binaryMatrix[idx]
+      })).sort((a,b) => b.scoreTotal - a.scoreTotal);
+
+      // Hitung batasan jumlah anggota kelompok atas-bawah
+      let groupCount = Math.round(N * (dpMethod / 100));
+      if (groupCount < 1) groupCount = 1;
+
+      const highGroup = sortedResponders.slice(0, groupCount);
+      const lowGroup = sortedResponders.slice(sortedResponders.length - groupCount);
+
+      // Render Kelompok Atas ke Tabel UI
+      const highTbody = document.getElementById('highGroupTbody');
+      highTbody.innerHTML = '';
+      highGroup.forEach((s, idx) => {
+        highTbody.innerHTML += `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2 font-semibold text-slate-400">${idx+1}</td>
+            <td class="py-2 font-medium text-slate-700">${s.name}</td>
+            <td class="py-2 text-right font-extrabold text-emerald-600">${s.scoreTotal}</td>
+          </tr>
+        `;
+      });
+
+      // Render Kelompok Bawah ke Tabel UI
+      const lowTbody = document.getElementById('lowGroupTbody');
+      lowTbody.innerHTML = '';
+      lowGroup.forEach((s, idx) => {
+        lowTbody.innerHTML += `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2 font-semibold text-slate-400">${idx+1}</td>
+            <td class="py-2 font-medium text-slate-700">${s.name}</td>
+            <td class="py-2 text-right font-extrabold text-rose-600">${s.scoreTotal}</td>
+          </tr>
+        `;
+      });
+
+      // 3. Menghitung Reliabilitas KR-20
+      // Rumus: r11 = [k / (k-1)] * [1 - (Σ(p*q) / Vt)]
+      let sumPq = 0;
+      const propPList = []; // Proporsi jawaban benar per butir
+
+      for (let qIdx = 0; qIdx < totalQuestions; qIdx++) {
+        let correctCount = 0;
+        for (let sIdx = 0; sIdx < N; sIdx++) {
+          if (binaryMatrix[sIdx][qIdx] === 1) correctCount++;
+        }
+        const p = correctCount / N;
+        const q = 1 - p;
+        propPList.push(p);
+        sumPq += (p * q);
+      }
+
+      // Hitung Varians Total (Vt)
+      const meanScore = scoresArray.reduce((acc, curr) => acc + curr, 0) / N;
+      const sumSquaredDiff = scoresArray.reduce((acc, curr) => acc + Math.pow(curr - meanScore, 2), 0);
+      const Vt = sumSquaredDiff / N;
+
+      let kr20 = 0;
+      if (totalQuestions > 1 && Vt > 0) {
+        kr20 = (totalQuestions / (totalQuestions - 1)) * (1 - (sumPq / Vt));
+      }
+
+      // Tampilkan hasil reliabilitas ke UI
+      const rValueElem = document.getElementById('reliabilityVal');
+      const rBadgeElem = document.getElementById('reliabilityBadge');
+      const rDescElem = document.getElementById('reliabilityDesc');
+
+      rValueElem.innerText = kr20.toFixed(3);
+      if (kr20 >= 0.70) {
+        rBadgeElem.className = "text-[10px] px-2 py-0.5 rounded font-bold uppercase bg-emerald-100 text-emerald-800";
+        rBadgeElem.innerText = "Sangat Tinggi";
+        rDescElem.innerText = "Sangat reliabel! Butir soal memiliki konsistensi tinggi.";
+      } else if (kr20 >= 0.50) {
+        rBadgeElem.className = "text-[10px] px-2 py-0.5 rounded font-bold uppercase bg-amber-100 text-amber-800";
+        rBadgeElem.innerText = "Cukup";
+        rDescElem.innerText = "Konsistensi instrumen tergolong sedang/cukup.";
+      } else {
+        rBadgeElem.className = "text-[10px] px-2 py-0.5 rounded font-bold uppercase bg-rose-100 text-rose-800";
+        rBadgeElem.innerText = "Sangat Rendah";
+        rDescElem.innerText = "Konsistensi butir soal rendah (perlu banyak perbaikan).";
+      }
+
+      // 4. Hitung r-Hitung Per Soal (Pearson) & Parameter Butir Soal Lainnya
+      const resultsBody = document.getElementById('analysisResultsTbody');
+      resultsBody.innerHTML = '';
+      
+      let validCounter = 0;
+
+      for (let qIdx = 0; qIdx < totalQuestions; qIdx++) {
+        // A. Perhitungan Validitas (Pearson)
+        let sumX = 0;
+        let sumY = 0;
+        let sumXY = 0;
+        let sumX2 = 0;
+        let sumY2 = 0;
+
+        for (let sIdx = 0; sIdx < N; sIdx++) {
+          const X = binaryMatrix[sIdx][qIdx];
+          const Y = scoresArray[sIdx];
+
+          sumX += X;
+          sumY += Y;
+          sumXY += (X * Y);
+          sumX2 += (X * X);
+          sumY2 += (Y * Y);
+        }
+
+        const numerator = (N * sumXY) - (sumX * sumY);
+        const denominator = Math.sqrt( ((N * sumX2) - Math.pow(sumX, 2)) * ((N * sumY2) - Math.pow(sumY, 2)) );
+
+        let rHitung = 0;
+        if (denominator !== 0) {
+          rHitung = numerator / denominator;
+        }
+
+        const isValid = rHitung >= rTabel;
+        if (isValid) validCounter++;
+
+        // B. Perhitungan Kesukaran (P)
+        const pVal = propPList[qIdx];
+        let kesukaranLabel = '';
+        let kesukaranClass = '';
+
+        if (pVal > 0.70) {
+          kesukaranLabel = 'Mudah';
+          kesukaranClass = 'text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold';
+        } else if (pVal >= 0.30) {
+          kesukaranLabel = 'Sedang';
+          kesukaranClass = 'text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-bold';
+        } else {
+          kesukaranLabel = 'Sukar';
+          kesukaranClass = 'text-rose-700 bg-rose-50 px-2 py-0.5 rounded font-bold';
+        }
+
+        // C. Perhitungan Daya Pembeda (DP)
+        let correctHighCount = 0;
+        let correctLowCount = 0;
+
+        highGroup.forEach(student => {
+          if (student.binary[qIdx] === 1) correctHighCount++;
+        });
+
+        lowGroup.forEach(student => {
+          if (student.binary[qIdx] === 1) correctLowCount++;
+        });
+
+        const dVal = (correctHighCount / groupCount) - (correctLowCount / groupCount);
+
+        let dpLabel = '';
+        let dpClass = '';
+        let recommendation = '';
+        let recClass = '';
+
+        if (dVal >= 0.40) {
+          dpLabel = 'Sangat Baik';
+          dpClass = 'text-emerald-700 bg-emerald-50 font-bold px-2 py-1 rounded';
+          recommendation = 'Diterima';
+          recClass = 'text-emerald-700 bg-emerald-100 font-bold px-2 py-1 rounded text-center block';
+        } else if (dVal >= 0.30) {
+          dpLabel = 'Baik';
+          dpClass = 'text-blue-700 bg-blue-50 font-bold px-2 py-1 rounded';
+          recommendation = 'Diterima';
+          recClass = 'text-blue-700 bg-blue-100 font-bold px-2 py-1 rounded text-center block';
+        } else if (dVal >= 0.20) {
+          dpLabel = 'Cukup';
+          dpClass = 'text-amber-700 bg-amber-50 font-bold px-2 py-1 rounded';
+          recommendation = 'Revisi';
+          recClass = 'text-amber-700 bg-amber-100 font-bold px-2 py-1 rounded text-center block';
+        } else {
+          dpLabel = 'Jelek';
+          dpClass = 'text-rose-700 bg-rose-50 font-bold px-2 py-1 rounded';
+          recommendation = 'Ditolak/Dibuang';
+          recClass = 'text-rose-700 bg-rose-100 font-bold px-2 py-1 rounded text-center block';
+        }
+
+        // Cetak Baris Tabel ke UI
+        const rowHTML = `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="p-3 text-center font-bold text-slate-700">${qIdx+1}</td>
+            <td class="p-3 text-center font-extrabold bg-blue-50/50 text-blue-900 text-sm">${keysArray[qIdx]}</td>
+            <td class="p-3 text-center font-semibold text-slate-600">${sumX} dari ${N}</td>
+            <td class="p-3 text-center text-blue-700 bg-blue-50/10 font-bold">${rHitung.toFixed(3)}</td>
+            <td class="p-3 text-center font-medium text-slate-500">${rTabel.toFixed(3)}</td>
+            <td class="p-3 text-center">
+              <span class="px-2 py-0.5 rounded font-bold ${isValid ? 'text-emerald-700 bg-emerald-100' : 'text-rose-700 bg-rose-100'}">
+                ${isValid ? 'Valid' : 'Tidak Valid'}
+              </span>
+            </td>
+            <td class="p-3 text-center font-semibold text-slate-700">${pVal.toFixed(3)}</td>
+            <td class="p-3 text-center">
+              <span class="${kesukaranClass}">${kesukaranLabel}</span>
+            </td>
+            <td class="p-3 text-center font-bold text-slate-800 bg-amber-50/10">${dVal.toFixed(3)}</td>
+            <td class="p-3 text-center">
+              <span class="${dpClass}">${dpLabel}</span>
+            </td>
+            <td class="p-3">
+              <span class="${recClass}">${recommendation}</span>
+            </td>
+          </tr>
+        `;
+        resultsBody.innerHTML += rowHTML;
+      }
+
+      // 5. Perbarui status Card Ringkasan
+      const validCountVal = document.getElementById('validCountVal');
+      const validPct = document.getElementById('validPct');
+      const validDesc = document.getElementById('validDesc');
+
+      validCountVal.innerText = `${validCounter} / ${totalQuestions}`;
+      const pct = (validCounter / totalQuestions) * 100;
+      validPct.innerText = `${pct.toFixed(1)}%`;
+      validDesc.innerText = `Menemukan sebanyak ${validCounter} butir soal valid dari total ${totalQuestions} soal.`;
+
+      // Kelayakan Instrumen
+      const instrQual = document.getElementById('instrumentQuality');
+      const instrDesc = document.getElementById('instrumentDesc');
+
+      if (pct >= 70 && kr20 >= 0.65) {
+        instrQual.innerText = "Sangat Layak";
+        instrQual.className = "text-2xl font-extrabold text-emerald-600 mt-1";
+        instrDesc.innerText = "Alat ukur/tes ini sangat konsisten dan memiliki butir soal valid yang dominan.";
+      } else if (pct >= 40 && kr20 >= 0.50) {
+        instrQual.innerText = "Cukup Layak";
+        instrQual.className = "text-2xl font-extrabold text-amber-600 mt-1";
+        instrDesc.innerText = "Instrumen cukup baik, tetapi beberapa butir tidak valid perlu direvisi atau dibuang.";
+      } else {
+        instrQual.innerText = "Kurang Layak";
+        instrQual.className = "text-2xl font-extrabold text-rose-600 mt-1";
+        instrDesc.innerText = "Sebagian besar butir soal gugur (tidak valid) atau nilai reliabilitasnya terlalu rendah.";
+      }
+
+      // Perbarui Info Detail Statistik di bawah bar rekap
+      document.getElementById('statsInformationText').innerHTML = `Jumlah Siswa ($N$) = <strong>${N}</strong> | Derajat Kebebasan ($df = N-2$) = <strong>${N-2}</strong> | Kriteria Batas Minimum $r$-Tabel ($\alpha = ${alpha*100}\%$) = <strong>${rTabel.toFixed(3)}</strong>`;
+
+      // Buka pembungkus hasil analisis
+      document.getElementById('resultsWrapper').classList.remove('hidden');
+      
+      // Gulir halaman secara mulus langsung ke arah hasil
+      document.getElementById('resultsWrapper').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // EKSPOR LAPORAN KE EXCEL (CSV FORMAT)
+    function downloadCSVReport() {
+      const csvRows = [];
+      
+      // Header Utama
+      csvRows.push(["Laporan Analisis Butir Soal UAS Kuantitatif"]);
+      csvRows.push([`Jumlah Responden (N); ${studentsAnswers.length}`]);
+      csvRows.push([`Reliabilitas Tes (KR-20); ${document.getElementById('reliabilityVal').innerText}`]);
+      csvRows.push([]); // baris kosong
+
+      // Header Tabel Rincian
+      csvRows.push(["No Soal", "Kunci", "Jumlah Siswa Benar", "r-Hitung", "r-Tabel", "Status Validitas", "Indeks Kesukaran", "Kategori Kesukaran", "Indeks Daya Pembeda", "Kategori Daya Pembeda", "Rekomendasi Butir"]);
+
+      const rows = document.querySelectorAll('#analysisResultsTbody tr');
+      rows.forEach(r => {
+        const cols = r.querySelectorAll('td');
+        const rowData = [];
+        cols.forEach(c => {
+          rowData.push(c.innerText.trim());
+        });
+        csvRows.push(rowData);
+      });
+
+      // Menyatukan baris menggunakan pembatas semicolon (Excel regional Indonesia)
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvRows.forEach(row => {
+        const rowStr = row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(";");
+        csvContent += rowStr + "\r\n";
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const downloadLink = document.createElement("a");
+      downloadLink.setAttribute("href", encodedUri);
+      downloadLink.setAttribute("download", `Laporan_Analisis_Butir_Soal_UAS_${Date.now()}.csv`);
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
+
+    // MEMULAI INTI APLIKASI SAAT LAYAR DI-LOAD
+    window.onload = function() {
+      rebuildTableStructure();
+    };
+  </script>
+</body>
+</html>
